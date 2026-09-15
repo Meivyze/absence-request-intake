@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request an Excused Absence</title>
+<style>
+  :root {
+    color-scheme: light;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f7f7f8;
+    margin: 0;
+    padding: 40px 16px;
+    display: flex;
+    justify-content: center;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    max-width: 480px;
+    width: 100%;
+    padding: 32px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 8px;
+  }
+  p.subtitle {
+    color: #555;
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  #email-fallback {
+    display: none;
+  }
+  #status {
+    margin-top: 16px;
+    font-size: 14px;
+    text-align: center;
+  }
+  #status.error {
+    color: #b3261e;
+  }
+  #status.loading {
+    color: #555;
+  }
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ccc;
+    border-top-color: #1a1a1a;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .footnote {
+    font-size: 12px;
+    color: #888;
+    margin-top: 20px;
+    text-align: center;
+  }
+  .footnote a {
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Request an Excused Absence</h1>
+  <p class="subtitle">Enter your CodePath-registered GitHub handle to get started. We'll pull up your course and attendance info automatically.</p>
+
+  <form id="lookup-form">
+    <label for="github-handle">GitHub handle</label>
+    <input type="text" id="github-handle" name="github-handle" placeholder="e.g. octocat" autocomplete="off" required>
+
+    <div id="email-fallback">
+      <label for="email">We couldn't find that GitHub handle — enter your CodePath email instead</label>
+      <input type="email" id="email" name="email" placeholder="you@codepath.org" autocomplete="off">
+    </div>
+
+    <button type="submit" id="submit-btn">Continue</button>
+  </form>
+
+  <div id="status"></div>
+
+  <p class="footnote">Having trouble? Email <a href="mailto:support@codepath.org">support@codepath.org</a>.</p>
+</div>
+
+<script>
+  // ---------------------------------------------------------------------
+  // CONFIG — update these once the backend lookup and Typeform are ready.
+  // ---------------------------------------------------------------------
+  const CONFIG = {
+    // Endpoint that accepts { identifier, type: "github"|"email" } and
+    // returns JSON like:
+    // { found: true, courses: [{ id, name, absenceCount, limit }] }
+    // or { found: false }
+    LOOKUP_API_URL: "REPLACE_WITH_BACKEND_LOOKUP_URL",
+
+    // Base Typeform URL (without query string), e.g.
+    // "https://codepathops.typeform.com/to/XXXXXXXX"
+    TYPEFORM_BASE_URL: "REPLACE_WITH_TYPEFORM_URL",
+
+    // How long to wait for the lookup before showing the fallback message (ms)
+    TIMEOUT_MS: 8000,
+  };
+  // ---------------------------------------------------------------------
+
+  const form = document.getElementById("lookup-form");
+  const githubInput = document.getElementById("github-handle");
+  const emailFallback = document.getElementById("email-fallback");
+  const emailInput = document.getElementById("email");
+  const submitBtn = document.getElementById("submit-btn");
+  const status = document.getElementById("status");
+
+  let awaitingEmailFallback = false;
+
+  function setStatus(message, kind) {
+    status.textContent = message;
+    status.className = kind || "";
+  }
+
+  function setLoading(isLoading) {
+    submitBtn.disabled = isLoading;
+    if (isLoading) {
+      setStatus("Looking you up…", "loading");
+    }
+  }
+
+  async function lookup(identifier, type) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), CONFIG.TIMEOUT_MS);
+
+    try {
+      const response = await fetch(CONFIG.LOOKUP_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, type }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        throw new Error("Lookup service returned an error");
+      }
+      return await response.json();
+    } catch (err) {
+      clearTimeout(timeout);
+      throw err;
+    }
+  }
+
+  function redirectToTypeform(result) {
+    const params = new URLSearchParams();
+
+    // Pre-load hidden fields for Typeform's native logic jumps to branch on.
+    // Adjust these keys to match the actual hidden field names configured
+    // in the Typeform once it's built.
+    if (result.courses && result.courses.length === 1) {
+      const course = result.courses[0];
+      params.set("course", course.id);
+      params.set("absence_count", course.absenceCount);
+      params.set("absence_limit", course.limit);
+    } else if (result.courses && result.courses.length > 1) {
+      // Multiple courses — pass them along so Typeform can present the
+      // course confirmation step (Step 3) instead of skipping it.
+      params.set("multi_course", "true");
+      params.set("courses_json", JSON.stringify(result.courses));
+    }
+
+    const redirectUrl = `${CONFIG.TYPEFORM_BASE_URL}#${params.toString()}`;
+    window.location.href = redirectUrl;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      let result;
+
+      if (!awaitingEmailFallback) {
+        // First attempt: GitHub handle
+        const handle = githubInput.value.trim();
+        if (!handle) {
+          setLoading(false);
+          setStatus("Please enter your GitHub handle.", "error");
+          return;
+        }
+        result = await lookup(handle, "github");
+
+        if (!result.found) {
+          // No match — reveal the email fallback and stop here so the
+          // student can enter it and resubmit.
+          setLoading(false);
+          awaitingEmailFallback = true;
+          emailFallback.style.display = "block";
+          emailInput.required = true;
+          setStatus("We couldn't find that GitHub handle — please enter your CodePath email below.", "error");
+          return;
+        }
+      } else {
+        // Second attempt: email fallback
+        const email = emailInput.value.trim();
+        if (!email) {
+          setLoading(false);
+          setStatus("Please enter your CodePath email.", "error");
+          return;
+        }
+        result = await lookup(email, "email");
+
+        if (!result.found) {
+          setLoading(false);
+          setStatus("We're having trouble finding your info right now. Try again in a moment, or email support@codepath.org.", "error");
+          return;
+        }
+      }
+
+      setStatus("Found you! Redirecting…", "loading");
+      redirectToTypeform(result);
+
+    } catch (err) {
+      setLoading(false);
+      setStatus("We're having trouble finding your info right now. Try again in a moment, or email support@codepath.org.", "error");
+    }
+  });
+</script>
+
+</body>
+</html>
