@@ -134,7 +134,7 @@
     // returns JSON like:
     // { found: true, courses: [{ id, name, absenceCount, limit }] }
     // or { found: false }
-    LOOKUP_API_URL: "REPLACE_WITH_BACKEND_LOOKUP_URL",
+    LOOKUP_API_URL: "https://script.google.com/macros/s/AKfycbwWsNsvPbJcGY7hNVNFShoxaz1p6PM_NO9yppEX80G1WeiVTpypacBFOrPL1UJel5-4/exec",
 
     // Base Typeform URL (without query string), e.g.
     // "https://codepathops.typeform.com/to/XXXXXXXX"
@@ -171,10 +171,16 @@
     const timeout = setTimeout(() => controller.abort(), CONFIG.TIMEOUT_MS);
 
     try {
-      const response = await fetch(CONFIG.LOOKUP_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier, type }),
+      // GET with query params — not POST. Apps Script web apps don't handle
+      // CORS preflight requests well, and a POST with a JSON body triggers
+      // one. A GET request with query params is sent as a "simple request"
+      // with no preflight, which Apps Script responds to correctly.
+      const url = new URL(CONFIG.LOOKUP_API_URL);
+      url.searchParams.set("identifier", identifier);
+      url.searchParams.set("type", type);
+
+      const response = await fetch(url.toString(), {
+        method: "GET",
         signal: controller.signal,
       });
       clearTimeout(timeout);
