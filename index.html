@@ -4,64 +4,125 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Request an Excused Absence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     color-scheme: light;
+    /* CodePath brand palette */
+    --cp-navy: #1B1C57;
+    --cp-navy-medium: #062F54;
+    --cp-green: #00C385;
+    --cp-periwinkle: #4F5DFF;
+    --cp-sky: #E9F6FF;
+    --cp-lemon: #FFCB03;
+    --cp-white: #FFFFFF;
+    --cp-black: #000000;
+  }
+  * {
+    box-sizing: border-box;
   }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: #f7f7f8;
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--cp-sky);
+    color: var(--cp-navy);
     margin: 0;
     padding: 40px 16px;
     display: flex;
     justify-content: center;
   }
+  .brand-eyebrow {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--cp-green);
+    margin: 0 0 18px;
+  }
   .card {
-    background: #ffffff;
+    background: var(--cp-white);
+    border: 1px solid var(--cp-black);
     border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 0 var(--cp-navy);
     max-width: 480px;
     width: 100%;
     padding: 32px;
   }
   h1 {
-    font-size: 20px;
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    color: var(--cp-navy);
+    font-size: 21px;
+    line-height: 1.2;
     margin: 0 0 8px;
   }
   p.subtitle {
-    color: #555;
+    color: var(--cp-navy-medium);
     font-size: 14px;
+    line-height: 1.5;
     margin: 0 0 24px;
   }
   label {
     display: block;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
+    color: var(--cp-navy);
     margin-bottom: 6px;
   }
-  input[type="text"], input[type="email"] {
+  input[type="text"], input[type="email"], input[type="date"], select {
     width: 100%;
     box-sizing: border-box;
     padding: 10px 12px;
     font-size: 14px;
-    border: 1px solid #ccc;
+    color: var(--cp-navy);
+    border: 1px solid #9aa3c2;
     border-radius: 8px;
     margin-bottom: 16px;
+    font-family: inherit;
+    background: var(--cp-white);
+  }
+  input:focus, select:focus {
+    outline: 2px solid var(--cp-periwinkle);
+    outline-offset: 1px;
   }
   button {
     width: 100%;
     padding: 12px;
     font-size: 15px;
     font-weight: 600;
-    background: #1a1a1a;
-    color: #fff;
+    font-family: "Poppins", sans-serif;
+    background: var(--cp-periwinkle);
+    color: var(--cp-white);
     border: none;
     border-radius: 8px;
     cursor: pointer;
   }
+  button:hover:not(:disabled) {
+    background: #3d4bf0;
+  }
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+  button.secondary {
+    background: var(--cp-white);
+    color: var(--cp-navy);
+    border: 1px solid var(--cp-navy);
+  }
+  button.secondary:hover:not(:disabled) {
+    background: var(--cp-sky);
+  }
+  button.link-btn {
+    width: auto;
+    background: none;
+    color: var(--cp-navy);
+    border: none;
+    text-decoration: underline;
+    padding: 4px 0;
+    font-size: 13px;
+    font-weight: 500;
   }
   #email-fallback {
     display: none;
@@ -75,14 +136,14 @@
     color: #b3261e;
   }
   #status.loading {
-    color: #555;
+    color: var(--cp-navy-medium);
   }
   .spinner {
     display: inline-block;
     width: 14px;
     height: 14px;
-    border: 2px solid #ccc;
-    border-top-color: #1a1a1a;
+    border: 2px solid #cdd3ea;
+    border-top-color: var(--cp-periwinkle);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin-right: 6px;
@@ -93,58 +154,215 @@
   }
   .footnote {
     font-size: 12px;
-    color: #888;
+    color: var(--cp-navy-medium);
     margin-top: 20px;
     text-align: center;
   }
   .footnote a {
-    color: #555;
+    color: var(--cp-navy);
+    font-weight: 600;
+  }
+  .info-box {
+    background: var(--cp-sky);
+    border: 1px solid #c3dcf0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--cp-navy);
+    margin-bottom: 20px;
+  }
+  .disclaimer-box {
+    background: #fff9e0;
+    border: 1px solid var(--cp-lemon);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--cp-navy);
+    margin-bottom: 16px;
+    display: none;
+  }
+  .course-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #9aa3c2;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .course-option:has(input:checked) {
+    border-color: var(--cp-periwinkle);
+    background: var(--cp-sky);
+  }
+  .course-option input {
+    margin: 0;
+    accent-color: var(--cp-periwinkle);
+  }
+  .date-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .date-row input[type="date"] {
+    margin-bottom: 0;
+    flex: 1;
+  }
+  .date-row button {
+    width: auto;
+    padding: 8px 10px;
+    background: var(--cp-white);
+    color: #b3261e;
+    border: 1px solid #9aa3c2;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .checkbox-row input {
+    margin-top: 3px;
+    accent-color: var(--cp-periwinkle);
+  }
+  .checkbox-row label {
+    font-weight: 400;
+    margin-bottom: 0;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .success-icon {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 8px;
   }
 </style>
 </head>
 <body>
 
 <div class="card">
-  <h1>Request an Excused Absence</h1>
-  <p class="subtitle">Enter your CodePath-registered GitHub handle to get started. We'll pull up your course and attendance info automatically.</p>
+  <p class="brand-eyebrow">CodePath*Org</p>
 
-  <form id="lookup-form">
-    <label for="github-handle">GitHub handle</label>
-    <input type="text" id="github-handle" name="github-handle" placeholder="e.g. octocat" autocomplete="off" required>
+  <!-- Screen 1: Identification -->
+  <div id="screen-identify">
+    <h1>Request an Excused Absence</h1>
+    <p class="subtitle">Enter your CodePath-registered GitHub handle to get started. We'll pull up your course and attendance info automatically.</p>
 
-    <div id="email-fallback">
-      <label for="email">We couldn't find that GitHub handle — enter your CodePath email instead</label>
-      <input type="email" id="email" name="email" placeholder="you@codepath.org" autocomplete="off">
+    <form id="lookup-form">
+      <label for="github-handle">GitHub handle</label>
+      <input type="text" id="github-handle" name="github-handle" placeholder="e.g. octocat" autocomplete="off" required>
+
+      <div id="email-fallback">
+        <label for="email">We couldn't find that GitHub handle — enter your CodePath email instead</label>
+        <input type="email" id="email" name="email" placeholder="you@codepath.org" autocomplete="off">
+      </div>
+
+      <button type="submit" id="submit-btn">Continue</button>
+    </form>
+
+    <div id="status"></div>
+  </div>
+
+  <!-- Screen 2: Course confirmation (only shown when a student has more than one course) -->
+  <div id="screen-course" hidden>
+    <h1>Which course is this for?</h1>
+    <p class="subtitle">You're enrolled in more than one course we have on file. Select the one this absence request applies to.</p>
+    <form id="course-form">
+      <div id="course-options"></div>
+      <button type="submit">Continue</button>
+    </form>
+  </div>
+
+  <!-- Screen 3: Session dates + reason + consent -->
+  <div id="screen-request" hidden>
+    <h1>Request details</h1>
+    <div class="info-box" id="course-context"></div>
+
+    <form id="request-form">
+      <label>Session date(s) you're requesting an excused absence for</label>
+      <div id="date-rows"></div>
+      <button type="button" id="add-date-btn" class="link-btn">+ Add another date</button>
+
+      <div class="disclaimer-box" id="limit-disclaimer">
+        Heads up — based on the date(s) selected, this request would put you over your allowable absence limit for this course. You can still submit it; our team reviews these individually.
+      </div>
+
+      <label for="reason" style="margin-top: 16px;">Reason for absence</label>
+      <select id="reason" name="reason" required>
+        <option value="">Select one</option>
+        <option value="Illness">Illness</option>
+        <option value="Personal">Personal</option>
+        <option value="Technical/access issue">Technical/access issue</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="consent" required>
+        <label for="consent">I understand this absence request will be logged and may trigger a follow-up email from CodePath.</label>
+      </div>
+
+      <button type="submit" id="request-submit-btn">Submit request</button>
+    </form>
+
+    <div id="request-status"></div>
+  </div>
+
+  <!-- Screen 4: Confirmation / multi-program follow-up -->
+  <div id="screen-done" hidden>
+    <div class="success-icon" style="color: var(--cp-green);">&#10003;</div>
+    <h1 style="text-align:center;">Request submitted</h1>
+    <p class="subtitle" style="text-align:center;" id="done-message">Your absence request has been logged.</p>
+
+    <div id="multi-program-prompt" hidden>
+      <p class="subtitle">You're also enrolled in another course — want to log a request for that one too?</p>
+      <button type="button" id="log-another-btn">Log another request</button>
+      <button type="button" id="done-btn" class="secondary" style="margin-top:10px;">No, I'm done</button>
     </div>
-
-    <button type="submit" id="submit-btn">Continue</button>
-  </form>
-
-  <div id="status"></div>
+  </div>
 
   <p class="footnote">Having trouble? Email <a href="mailto:support@codepath.org">support@codepath.org</a>.</p>
 </div>
 
 <script>
   // ---------------------------------------------------------------------
-  // CONFIG — update these once the backend lookup and Typeform are ready.
+  // CONFIG
   // ---------------------------------------------------------------------
   const CONFIG = {
-    // Endpoint that accepts { identifier, type: "github"|"email" } and
-    // returns JSON like:
-    // { found: true, courses: [{ id, name, absenceCount, limit }] }
-    // or { found: false }
+    // Lookup endpoint — accepts ?identifier=...&type=github|email and
+    // returns { found, courses: [{ id, name, absenceCount, limit }] }.
     LOOKUP_API_URL: "https://script.google.com/macros/s/AKfycbwWsNsvPbJcGY7hNVNFShoxaz1p6PM_NO9yppEX80G1WeiVTpypacBFOrPL1UJel5-4/exec",
 
-    // Base Typeform URL (without query string), e.g.
-    // "https://codepathops.typeform.com/to/XXXXXXXX"
-    TYPEFORM_BASE_URL: "REPLACE_WITH_TYPEFORM_URL",
+    // Submission endpoint — accepts the request details as query params
+    // (GET, same CORS-avoidance approach as the lookup) and logs a row.
+    // Replace once absence-submission-appscript.gs is deployed.
+    SUBMIT_API_URL: "https://script.google.com/macros/s/AKfycbyGdjCIKvda2YSyNWgVuTZL8EopVnjjuVhvleLC_UBhjDGRoTmlcgv-5J5MpiZujCBv/exec",
 
-    // How long to wait for the lookup before showing the fallback message (ms)
+    // How long to wait for a request before showing a fallback message (ms)
     TIMEOUT_MS: 8000,
   };
   // ---------------------------------------------------------------------
 
+  const screens = {
+    identify: document.getElementById("screen-identify"),
+    course: document.getElementById("screen-course"),
+    request: document.getElementById("screen-request"),
+    done: document.getElementById("screen-done"),
+  };
+
+  function showScreen(name) {
+    Object.keys(screens).forEach((key) => {
+      screens[key].hidden = key !== name;
+    });
+  }
+
+  // ---- State ----
+  let studentIdentifier = { type: null, value: null };
+  let remainingCourses = []; // courses not yet submitted this session
+  let currentCourse = null;
+
+  // ---- Screen 1: Identification ----
   const form = document.getElementById("lookup-form");
   const githubInput = document.getElementById("github-handle");
   const emailFallback = document.getElementById("email-fallback");
@@ -166,28 +384,20 @@
     }
   }
 
-  async function lookup(identifier, type) {
+  async function apiGet(baseUrl, params) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), CONFIG.TIMEOUT_MS);
-
     try {
+      const url = new URL(baseUrl);
+      Object.keys(params).forEach((key) => url.searchParams.set(key, params[key]));
+
       // GET with query params — not POST. Apps Script web apps don't handle
       // CORS preflight requests well, and a POST with a JSON body triggers
       // one. A GET request with query params is sent as a "simple request"
       // with no preflight, which Apps Script responds to correctly.
-      const url = new URL(CONFIG.LOOKUP_API_URL);
-      url.searchParams.set("identifier", identifier);
-      url.searchParams.set("type", type);
-
-      const response = await fetch(url.toString(), {
-        method: "GET",
-        signal: controller.signal,
-      });
+      const response = await fetch(url.toString(), { method: "GET", signal: controller.signal });
       clearTimeout(timeout);
-
-      if (!response.ok) {
-        throw new Error("Lookup service returned an error");
-      }
+      if (!response.ok) throw new Error("Service returned an error");
       return await response.json();
     } catch (err) {
       clearTimeout(timeout);
@@ -195,26 +405,8 @@
     }
   }
 
-  function redirectToTypeform(result) {
-    const params = new URLSearchParams();
-
-    // Pre-load hidden fields for Typeform's native logic jumps to branch on.
-    // Adjust these keys to match the actual hidden field names configured
-    // in the Typeform once it's built.
-    if (result.courses && result.courses.length === 1) {
-      const course = result.courses[0];
-      params.set("course", course.id);
-      params.set("absence_count", course.absenceCount);
-      params.set("absence_limit", course.limit);
-    } else if (result.courses && result.courses.length > 1) {
-      // Multiple courses — pass them along so Typeform can present the
-      // course confirmation step (Step 3) instead of skipping it.
-      params.set("multi_course", "true");
-      params.set("courses_json", JSON.stringify(result.courses));
-    }
-
-    const redirectUrl = `${CONFIG.TYPEFORM_BASE_URL}#${params.toString()}`;
-    window.location.href = redirectUrl;
+  function lookup(identifier, type) {
+    return apiGet(CONFIG.LOOKUP_API_URL, { identifier, type });
   }
 
   form.addEventListener("submit", async (e) => {
@@ -225,18 +417,16 @@
       let result;
 
       if (!awaitingEmailFallback) {
-        // First attempt: GitHub handle
         const handle = githubInput.value.trim();
         if (!handle) {
           setLoading(false);
           setStatus("Please enter your GitHub handle.", "error");
           return;
         }
+        studentIdentifier = { type: "github", value: handle };
         result = await lookup(handle, "github");
 
         if (!result.found) {
-          // No match — reveal the email fallback and stop here so the
-          // student can enter it and resubmit.
           setLoading(false);
           awaitingEmailFallback = true;
           emailFallback.style.display = "block";
@@ -245,13 +435,13 @@
           return;
         }
       } else {
-        // Second attempt: email fallback
         const email = emailInput.value.trim();
         if (!email) {
           setLoading(false);
           setStatus("Please enter your CodePath email.", "error");
           return;
         }
+        studentIdentifier = { type: "email", value: email };
         result = await lookup(email, "email");
 
         if (!result.found) {
@@ -261,13 +451,198 @@
         }
       }
 
-      setStatus("Found you! Redirecting…", "loading");
-      redirectToTypeform(result);
-
+      remainingCourses = result.courses || [];
+      proceedAfterLookup();
     } catch (err) {
       setLoading(false);
       setStatus("We're having trouble finding your info right now. Try again in a moment, or email support@codepath.org.", "error");
     }
+  });
+
+  function proceedAfterLookup() {
+    if (remainingCourses.length === 0) {
+      setLoading(false);
+      setStatus("We found you, but no course enrollment on file. Please email support@codepath.org.", "error");
+      return;
+    }
+    if (remainingCourses.length === 1) {
+      selectCourse(remainingCourses[0]);
+    } else {
+      renderCourseScreen();
+      showScreen("course");
+    }
+  }
+
+  // ---- Screen 2: Course confirmation ----
+  const courseForm = document.getElementById("course-form");
+  const courseOptions = document.getElementById("course-options");
+
+  function renderCourseScreen() {
+    courseOptions.innerHTML = "";
+    remainingCourses.forEach((course, i) => {
+      const wrapper = document.createElement("label");
+      wrapper.className = "course-option";
+      wrapper.innerHTML = `
+        <input type="radio" name="course-choice" value="${i}" ${i === 0 ? "checked" : ""}>
+        <span>${course.name}</span>
+      `;
+      courseOptions.appendChild(wrapper);
+    });
+  }
+
+  courseForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const selected = courseForm.querySelector('input[name="course-choice"]:checked');
+    if (!selected) return;
+    selectCourse(remainingCourses[parseInt(selected.value, 10)]);
+  });
+
+  function selectCourse(course) {
+    currentCourse = course;
+    renderRequestScreen(course);
+    showScreen("request");
+  }
+
+  // ---- Screen 3: Session dates, reason, consent ----
+  const courseContext = document.getElementById("course-context");
+  const dateRows = document.getElementById("date-rows");
+  const addDateBtn = document.getElementById("add-date-btn");
+  const limitDisclaimer = document.getElementById("limit-disclaimer");
+  const requestForm = document.getElementById("request-form");
+  const requestSubmitBtn = document.getElementById("request-submit-btn");
+  const requestStatus = document.getElementById("request-status");
+  const reasonSelect = document.getElementById("reason");
+  const consentCheckbox = document.getElementById("consent");
+
+  function renderRequestScreen(course) {
+    const count = Number(course.absenceCount) || 0;
+    const limit = Number(course.limit) || 0;
+    courseContext.textContent = `${course.name} — you currently have ${count} of ${limit} allowable absences used.`;
+
+    dateRows.innerHTML = "";
+    addDateRow();
+    limitDisclaimer.style.display = "none";
+    reasonSelect.value = "";
+    consentCheckbox.checked = false;
+    requestStatus.textContent = "";
+    requestStatus.className = "";
+  }
+
+  function addDateRow() {
+    const row = document.createElement("div");
+    row.className = "date-row";
+    row.innerHTML = `
+      <input type="date" class="session-date" required>
+      <button type="button" class="remove-date-btn">✕</button>
+    `;
+    row.querySelector(".remove-date-btn").addEventListener("click", () => {
+      if (dateRows.children.length > 1) {
+        row.remove();
+        checkLimitDisclaimer();
+      }
+    });
+    row.querySelector("input").addEventListener("change", checkLimitDisclaimer);
+    dateRows.appendChild(row);
+  }
+
+  addDateBtn.addEventListener("click", () => {
+    addDateRow();
+    checkLimitDisclaimer();
+  });
+
+  function getSelectedDates() {
+    return Array.from(dateRows.querySelectorAll(".session-date"))
+      .map((input) => input.value)
+      .filter(Boolean);
+  }
+
+  function checkLimitDisclaimer() {
+    if (!currentCourse) return;
+    const count = Number(currentCourse.absenceCount) || 0;
+    const limit = Number(currentCourse.limit) || 0;
+    const requestedTotal = count + getSelectedDates().length;
+    limitDisclaimer.style.display = requestedTotal > limit ? "block" : "none";
+  }
+
+  requestForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const dates = getSelectedDates();
+    if (dates.length === 0) {
+      requestStatus.textContent = "Please select at least one session date.";
+      requestStatus.className = "error";
+      return;
+    }
+    if (!reasonSelect.value) {
+      requestStatus.textContent = "Please select a reason.";
+      requestStatus.className = "error";
+      return;
+    }
+    if (!consentCheckbox.checked) {
+      requestStatus.textContent = "Please acknowledge the checkbox above to submit.";
+      requestStatus.className = "error";
+      return;
+    }
+
+    const count = Number(currentCourse.absenceCount) || 0;
+    const limit = Number(currentCourse.limit) || 0;
+    const exceedsLimit = (count + dates.length) > limit;
+
+    requestSubmitBtn.disabled = true;
+    requestStatus.textContent = "Submitting…";
+    requestStatus.className = "loading";
+
+    try {
+      await apiGet(CONFIG.SUBMIT_API_URL, {
+        identifierType: studentIdentifier.type,
+        identifier: studentIdentifier.value,
+        courseId: currentCourse.id,
+        courseName: currentCourse.name,
+        dates: dates.join(","),
+        reason: reasonSelect.value,
+        exceedsLimit: exceedsLimit ? "true" : "false",
+        consent: "true",
+      });
+
+      // Remove the submitted course from the remaining list.
+      remainingCourses = remainingCourses.filter((c) => c.id !== currentCourse.id || c.name !== currentCourse.name);
+      showDoneScreen();
+    } catch (err) {
+      requestSubmitBtn.disabled = false;
+      requestStatus.textContent = "We're having trouble submitting your request right now. Try again in a moment, or email support@codepath.org.";
+      requestStatus.className = "error";
+    }
+  });
+
+  // ---- Screen 4: Confirmation / multi-program follow-up ----
+  const doneMessage = document.getElementById("done-message");
+  const multiProgramPrompt = document.getElementById("multi-program-prompt");
+  const logAnotherBtn = document.getElementById("log-another-btn");
+  const doneBtn = document.getElementById("done-btn");
+
+  function showDoneScreen() {
+    showScreen("done");
+    if (remainingCourses.length > 0) {
+      doneMessage.textContent = "Your absence request has been logged.";
+      multiProgramPrompt.hidden = false;
+    } else {
+      doneMessage.textContent = "Your absence request has been logged. You're all set.";
+      multiProgramPrompt.hidden = true;
+    }
+  }
+
+  logAnotherBtn.addEventListener("click", () => {
+    multiProgramPrompt.hidden = true;
+    if (remainingCourses.length === 1) {
+      selectCourse(remainingCourses[0]);
+    } else if (remainingCourses.length > 1) {
+      renderCourseScreen();
+      showScreen("course");
+    }
+  });
+
+  doneBtn.addEventListener("click", () => {
+    multiProgramPrompt.hidden = true;
   });
 </script>
 
